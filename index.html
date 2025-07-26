@@ -242,6 +242,11 @@
         .animate-opacity-0 {
             opacity: 0;
         }
+
+        /* Add this to your existing styles */
+        #hero-image {
+            transition: opacity 0.5s ease;
+        }
     </style>
 </head>
 
@@ -380,22 +385,12 @@
                     </div>
                 </div>
                 <div class="mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0">
-                    <div class="relative mx-auto w-full rounded-lg shadow-lg overflow-hidden floating">
-                        <img class="w-full"
+                    <div class="relative mx-auto w-full rounded-lg shadow-lg overflow-hidden floating"
+                        style="width: 600px; height: 400px;">
+                        <!-- Hero image with fixed dimensions -->
+                        <img class="w-full h-full object-cover" id="hero-image"
                             src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=2850&q=80"
                             alt="Students learning">
-                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0">
-                                    <img class="h-10 w-10 rounded-full"
-                                        src="https://randomuser.me/api/portraits/women/12.jpg" alt="Instructor">
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-white">Sarah Johnson</p>
-                                    <p class="text-xs text-[#FFB6C1]">Web Development Instructor</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -912,34 +907,231 @@
             card.style.transition = 'transform 0.3s ease';
         });
 
-        // Smooth scrolling for anchor links
+        // Enhanced smooth scrolling for anchor links with offset for fixed header
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    const headerOffset = 80; // Height of your fixed header
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
             });
         });
 
-        // Dynamic course selection (simplified example)
+        // Scroll to specific course when clicking on header course links
+        document.querySelectorAll('nav a[href="#all-courses"]').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetElement = document.getElementById('all-courses');
+
+                if (targetElement) {
+                    const headerOffset = 80;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Dynamic course selection with smooth scroll to course details
         const courseElements = document.querySelectorAll('.course-card');
         courseElements.forEach(course => {
-            course.addEventListener('click', function () {
-                // In a real implementation, this would update a course details section
+            course.addEventListener('click', function (e) {
+                // Prevent navigation if clicking on buttons inside the card
+                if (e.target.tagName === 'BUTTON') return;
+
+                // In a real implementation, this would scroll to a course details section
+                // For now, we'll just log and highlight the selected course
                 console.log('Course selected:', this.querySelector('h3').textContent);
+
+                // Add visual feedback
+                this.style.transform = 'scale(0.98)';
+                this.style.boxShadow = '0 4px 6px rgba(128, 0, 32, 0.3)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                    this.style.boxShadow = '';
+                }, 300);
             });
         });
 
-        // Chat bubble functionality (simplified example)
+        // Chat bubble functionality
         const chatBubble = document.querySelector('.chat-bubble button');
-        chatBubble.addEventListener('click', function () {
-            alert('AI Assistant: How can I help you today?');
-            // In a real implementation, this would open a chat interface
+        if (chatBubble) {
+            chatBubble.addEventListener('click', function () {
+                // Create a simple chat interface
+                const chatWindow = document.createElement('div');
+                chatWindow.style.position = 'fixed';
+                chatWindow.style.bottom = '90px';
+                chatWindow.style.right = '20px';
+                chatWindow.style.width = '300px';
+                chatWindow.style.maxHeight = '400px';
+                chatWindow.style.backgroundColor = 'white';
+                chatWindow.style.borderRadius = '10px';
+                chatWindow.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+                chatWindow.style.zIndex = '1000';
+                chatWindow.style.overflow = 'hidden';
+                chatWindow.style.transform = 'scale(0.9)';
+                chatWindow.style.opacity = '0';
+                chatWindow.style.transition = 'all 0.3s ease';
+
+                chatWindow.innerHTML = `
+                <div style="background-color: #800020; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 16px;">U1 Technology Assistant</h3>
+                    <button id="close-chat" style="background: none; border: none; color: white; cursor: pointer; font-size: 18px;">×</button>
+                </div>
+                <div id="chat-messages" style="padding: 15px; height: 300px; overflow-y: auto; background-color: #f9f9f9;">
+                    <div style="margin-bottom: 10px; text-align: center; color: #666; font-size: 12px;">Today</div>
+                    <div style="background-color: #800020; color: white; padding: 8px 12px; border-radius: 18px 18px 18px 0; max-width: 80%; display: inline-block; margin-bottom: 10px;">
+                        Hello! How can I help you today?
+                    </div>
+                </div>
+                <div style="padding: 10px; display: flex; border-top: 1px solid #eee;">
+                    <input type="text" placeholder="Type your message..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 20px; outline: none;">
+                    <button style="background-color: #800020; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; margin-left: 8px; cursor: pointer;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            `;
+
+                document.body.appendChild(chatWindow);
+
+                // Animate chat window appearance
+                setTimeout(() => {
+                    chatWindow.style.transform = 'scale(1)';
+                    chatWindow.style.opacity = '1';
+                }, 10);
+
+                // Close chat functionality
+                const closeBtn = chatWindow.querySelector('#close-chat');
+                closeBtn.addEventListener('click', () => {
+                    chatWindow.style.transform = 'scale(0.9)';
+                    chatWindow.style.opacity = '0';
+                    setTimeout(() => {
+                        chatWindow.remove();
+                    }, 300);
+                });
+
+                // Handle chat input
+                const chatInput = chatWindow.querySelector('input');
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+
+                chatWindow.querySelector('button').addEventListener('click', sendMessage);
+
+                function sendMessage() {
+                    const message = chatInput.value.trim();
+                    if (message) {
+                        // Add user message
+                        const userMessage = document.createElement('div');
+                        userMessage.style.textAlign = 'right';
+                        userMessage.style.marginBottom = '10px';
+                        userMessage.innerHTML = `
+                        <div style="background-color: #e5e5ea; color: black; padding: 8px 12px; border-radius: 18px 18px 0 18px; max-width: 80%; display: inline-block;">
+                            ${message}
+                        </div>
+                    `;
+                        document.getElementById('chat-messages').appendChild(userMessage);
+
+                        // Clear input
+                        chatInput.value = '';
+
+                        // Scroll to bottom
+                        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+
+                        // Simulate reply after delay
+                        setTimeout(() => {
+                            const replyMessage = document.createElement('div');
+                            replyMessage.style.marginBottom = '10px';
+                            replyMessage.innerHTML = `
+                            <div style="background-color: #800020; color: white; padding: 8px 12px; border-radius: 18px 18px 18px 0; max-width: 80%; display: inline-block;">
+                                Thanks for your message! A real assistant would respond here.
+                            </div>
+                        `;
+                            document.getElementById('chat-messages').appendChild(replyMessage);
+                            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+                        }, 1000);
+                    }
+                }
+            });
+        }
+
+        // Show login popup automatically after 10 seconds
+        setTimeout(() => {
+            const modal = document.getElementById('auth-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                    modal.style.backdropFilter = 'blur(8px)';
+                }, 10);
+
+                // Set to login tab by default
+                const loginTab = modal.querySelector('button:nth-child(1)');
+                if (loginTab) {
+                    loginTab.click();
+                }
+
+                // Close modal after 30 seconds if not interacted with
+                setTimeout(() => {
+                    if (modal.style.opacity === '1') {
+                        modal.style.opacity = '0';
+                        modal.style.backdropFilter = 'blur(0)';
+                        setTimeout(() => {
+                            modal.style.display = 'none';
+                        }, 300);
+                    }
+                }, 30000);
+            }
+        }, 10000);
+
+        // Track scroll position to potentially show login popup
+        let scrolledHalfway = false;
+        window.addEventListener('scroll', () => {
+            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            // Show popup when user scrolls halfway down the page
+            if (!scrolledHalfway && scrollPosition > (documentHeight - windowHeight) / 2) {
+                scrolledHalfway = true;
+                const modal = document.getElementById('auth-modal');
+                if (modal && modal.style.display === 'none') {
+                    modal.style.display = 'flex';
+                    setTimeout(() => {
+                        modal.style.opacity = '1';
+                        modal.style.backdropFilter = 'blur(8px)';
+                    }, 10);
+
+                    // Set to signup tab when scrolled
+                    const signupTab = modal.querySelector('button:nth-child(2)');
+                    if (signupTab) {
+                        signupTab.click();
+                    }
+                }
+            }
         });
     </script>
 
     <script src="./script/log.js"></script>
+    <script src="./chat-assistant.js"></script>
+    <script src="./hero-slideshow.js"></script>
+    <script src="./company-slider.js"></script>
 
 </body>
 
